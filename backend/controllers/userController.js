@@ -1,13 +1,15 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/users.js';
+import { isAdminValid } from '../middleware/authorizeRole.js'
+import { authenticateToken } from '../middleware/auth.js';
 //import users from '../models/users.js';
 
-const JWT_SECRET = process.env.JWT_SECRET; // Secure secret with environment variables in production
+//const JWT_SECRET = process.env.JWT_SECRET; // Secure secret with environment variables in production
 const SALT_ROUNDS = 10;
 
 // User Registration
-export const registerUser = async (req, res) => {
+export async function register(req, res){
     try {
         const { name, email, password, role, age, address, phoneNo } = req.body;
 
@@ -66,7 +68,7 @@ export const registerUser = async (req, res) => {
         res.status(500).json({ message: 'Error logging in', error: error.message });
     }
 }; */
-export function loginUser(req, res) {
+export function login(req, res) {
     const credentials = req.body;
 
     User.findOne({ email: credentials.email }).then((user) => {
@@ -78,10 +80,10 @@ export function loginUser(req, res) {
                 res.status(401).json({ message: "Invalid password!" });
             } else {
                 const payload = {
-                    id: user._id,
+                    id: user._id, 
                     email: user.email,
                     name: user.name,
-                    type: user.type
+                    role: user.role
                 }
 
                 const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '48h' });
@@ -94,8 +96,32 @@ export function loginUser(req, res) {
     });
 }
 
-// Get User by ID (Admin or user themselves)
+// Get User by ID (Admin)
+export async function getUserById(req, res) {
+    const adminValid = isAdminValid(req);
 
+    if (!adminValid) {
+        res.status(403).json({
+            message: 'Access denied: Unauthorized role'
+        });
+        return;
+    } 
+
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+        if (!user) { 
+            res.status(404).json({
+                message: 'User not found'
+            });  
+        } 
+            res.json(user);
+    }catch (error) {
+        // Handle unexpected errors
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
 
 // Update User Profile (Admin or user themselves)
 
