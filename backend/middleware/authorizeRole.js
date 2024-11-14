@@ -16,7 +16,7 @@ export function isRoleValid(req, role) {
 
 // Specific role validation functions for readability if needed
 export const isAdminValid = (req) => isRoleValid(req, "admin");
-export const isCustomerValid = (req) => isRoleValid(req, "customer");
+export const isInstructorValid = (req) => isRoleValid(req, "instructor");
 
 // Middleware for authorizing specific roles
 export const authorizeRole = (roles) => {
