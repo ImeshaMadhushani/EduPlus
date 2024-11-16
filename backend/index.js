@@ -4,11 +4,17 @@ import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import lessonRoutes from './routes/lessonRoutes.js';
-
+import cors from 'cors';
 dotenv.config(); // Load environment variables
 
 const app = express();
 app.use(express.json()); // Middleware for parsing JSON
+
+app.use(cors({
+  origin: 'http://localhost:3000',  // Allow requests from the frontend (localhost:3000)
+  methods: 'GET, POST, PUT, DELETE',  // Allowed HTTP methods
+  credentials: true  // Allow credentials like cookies or authorization headers
+}));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {

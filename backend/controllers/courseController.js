@@ -127,3 +127,23 @@ export async function deleteCourse(req, res) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 }
+
+export async function enrolledCourse(req, res) { 
+    try {
+        // Get the student ID from the JWT token (or query parameter)
+        const studentId = req.user.id;
+
+        // Find the student and populate the courses array with course details
+        const student = await Student.findById(studentId).populate('courses');
+
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Send the enrolled courses as the response
+        res.json({ enrolledCourses: student.courses });
+    } catch (error) { 
+        console.error("Error enrolling course:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+}
